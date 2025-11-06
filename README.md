@@ -7,13 +7,13 @@ that is compiled into a module using [F2PY](https://numpy.org/doc/stable/f2py/in
 provided at runtime.
 
 ## Installation
-### From [GitHub](https://github.com/sunipkm/msis21py)
-```sh
-pip install msis21py@git+https://github.com/sunipkm/msis21py
-```
 ### From [PyPI](https://pypi.org/project/msis21py/)
 ```sh
 pip install msis21py
+```
+### From [GitHub](https://github.com/sunipkm/msis21py)
+```sh
+pip install msis21py@git+https://github.com/sunipkm/msis21py
 ```
 
 ## Usage
