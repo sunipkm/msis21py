@@ -44,8 +44,6 @@ plt.show()
   - `settings`: JSON string of settings (`msis21py.Settings`) used to evaluate the model.
   - `date`: ISO formatted date and time for which the model was evaluated.
   - `lat` and `lon`: Latitude and longitude for where the model was evaluated.
-  - Additional attributes as returned in the `OARR` struct (refer to IRI-2020 documentation).
-    These additional attributes are provided as JSON dictionaries containing a `value`, its `unit`,
-    a longer name (`long_name`) and an associated `description`, if available.
+  - Additional attributes are provided as JSON dictionaries containing a `value`, its `unit`, a longer name (`long_name`) and an associated `description`, if available.
 
 The dataset is NetCDF4 compatible.
