@@ -4,20 +4,21 @@ from .msis21shim import msis21py_init, msis21py_eval  # type: ignore
 from datetime import datetime, UTC, timedelta
 import os
 from pathlib import Path
-import sys
 from dataclasses import dataclass
 from time import perf_counter_ns
-from typing import Any, Dict, Optional, Tuple, SupportsFloat as Numeric
-
+from typing import Any, Dict, Iterable, Optional, Sequence, Tuple, SupportsFloat as Numeric
 import numpy as np
 from xarray import Dataset
+import geomagdata as gi
+import importlib.metadata
 
 from .utils import Singleton, msisdate
 from .settings import Settings, ComputedSettings
 
+__version__ = importlib.metadata.version("msis21py")
+
 DIRNAME = Path(os.path.dirname(__file__))
-DATADIR = DIRNAME / "data"
-DATADIR = DATADIR.resolve()
+DATADIR = DIRNAME.resolve()
 
 
 @dataclass
@@ -54,7 +55,7 @@ class NrlMsis21(Singleton):
         self.settings = settings
         cs = ComputedSettings.from_settings(self.settings)
         msis21py_init(
-            parmpath=str(DATADIR),
+            parmpath=str(DATADIR) + '/',
             parmfile='msis21.parm',
             switch_legacy=cs.switch_legacy,
         )
@@ -109,7 +110,7 @@ class NrlMsis21(Singleton):
         descriptions = ['Helium', 'Atomic Oxygen', 'Molecular Nitrogen',
                         'Molecular Oxygen', 'Argon', 'Hydrogen', 'Nitrogen',
                         'Anomalous Oxygen', 'Nitric Oxide']
-        density_idx = list(range(5)) + list(range(7, 11))
+        density_idx = list(range(5)) + list(range(7, 10))
         for idx, name, desc in zip(density_idx, densities, descriptions):
             ds[name] = (('alt_km',), fort_densities[idx],
                         {'units': 'cm^-3', 'long_name': f'{desc} Density'})
@@ -119,9 +120,35 @@ class NrlMsis21(Singleton):
                     {'units': 'K', 'long_name': 'Neutral Temperature'})
         ds_build = perf_counter_ns()
         ds.attrs['attributes'] = 'Stored as JSON strings'
-        ds.attrs['description'] = 'IRI 2020 model output'
+        ds.attrs['description'] = 'NRLMSIS-2.1 model output'
+        ds.attrs['version'] = __version__
+        ds.attrs['lat'] = Attribute(
+            value=float(lat),
+            units='degrees',
+            long_name='Geographic Latitude',
+        ).to_json()
+        ds.attrs['lon'] = Attribute(
+            value=float(lon),
+            units='degrees',
+            long_name='Geographic Longitude',
+        ).to_json()
+        ds.attrs['f107p'] = Attribute(
+            value=float(f107[1]),
+            units='sfu',
+            long_name='Previous Day F10.7 Solar Flux',
+        ).to_json()
+        ds.attrs['f107a'] = Attribute(
+            value=float(f107[0]),
+            units='sfu',
+            long_name='81-day Average F10.7 Solar Flux',
+        ).to_json()
+        ds.attrs['Ap'] = Attribute(
+            value=float(ap[0]),
+            units=None,
+            long_name='Daily Ap Geomagnetic Index',
+        ).to_json()
         ds.attrs['exot'] = Attribute(
-            value=exot,
+            value=float(exot),
             units='K',
             long_name='Exosphere Temperature',
         ).to_json()
@@ -142,6 +169,8 @@ class NrlMsis21(Singleton):
         self,
         time: datetime,
         lat: Numeric, lon: Numeric, alt: np.ndarray,
+        *,
+        geomag_params: Optional[dict[str, Numeric] | Sequence[Numeric]] = None,
     ) -> Dataset:
         """Evaluate the NRLMSIS-2.1 model.
 
@@ -157,13 +186,35 @@ class NrlMsis21(Singleton):
         if time.tzinfo is not None:
             time = time.astimezone(UTC)
         ydate, utsec = msisdate(time)
+        if geomag_params is None:
+            ip = gi.get_indices([time - timedelta(days=1), time],
+                                81, tzaware=True)  # type: ignore
+            f107a = float(ip["f107s"].iloc[1])
+            f107 = float(ip['f107'].iloc[1])
+            f107p = float(ip['f107'].iloc[0])
+            ap = float(ip["Ap"].iloc[1])
+        elif isinstance(geomag_params, dict):
+            f107a = float(geomag_params['f107a'])
+            f107 = float(geomag_params['f107'])
+            f107p = float(geomag_params['f107p'])
+            ap = float(geomag_params['Ap'])
+        elif isinstance(geomag_params, Sequence):
+            f107a = float(geomag_params[0])
+            f107 = float(geomag_params[1])
+            f107p = float(geomag_params[2])
+            ap = float(geomag_params[3])
+        else:
+            raise RuntimeError('Invalid type %s for geomag params %s' % (
+                str(type(geomag_params), str(geomag_params))))
         lon = lon % 360  # ensure lon is in 0-360 range
         ds = self.lowlevel(
-            lat, lon, alt, ydate, utsec)
+            lat, lon, alt, ydate, utsec,
+            f107a, f107p, ap
+        )
         ds.attrs['date'] = time.isoformat()
         return ds
 
-    def lowlevel(self, lat: Numeric, lon: Numeric, alt: np.ndarray, ydate: int, ut: Numeric) -> Dataset:
+    def lowlevel(self, lat: Numeric, lon: Numeric, alt: np.ndarray, ydate: int, ut: Numeric, f107a: Numeric, f107p: Numeric, ap: Numeric) -> Dataset:
         """Low level call to evaluate NRLMSIS-2.1 model.
         Bypasses date and time calculations.
 
@@ -177,7 +228,11 @@ class NrlMsis21(Singleton):
         Returns:
             Dataset: Computed dataset.
         """
-        ds = self._msiscall(lat, lon, alt, ydate, ut)
+        ds = self._msiscall(
+            lat, lon, alt, ydate, ut,
+            (f107a, f107p),
+            np.array([ap] + [0]*6, dtype=np.float32, order='F')
+        )
         return ds
 
 
@@ -185,11 +240,10 @@ class NrlMsis21(Singleton):
 def test():
     import matplotlib.pyplot as plt
     from pprint import pprint
-    from msis21py import NrlMsis21, Settings, alt_grid
-    settings = Settings(logfile=Path('iri_log.txt'))
-    iri = NrlMsis21()
+    from msis21py import NrlMsis21, alt_grid
+    msis = NrlMsis21()
     date = datetime(2022, 3, 21, 12, 0, 0, tzinfo=UTC)
-    set, ds1 = iri.evaluate(
+    ds1 = msis.evaluate(
         date,
         40.0, 105.0,
         alt_grid(),
@@ -206,20 +260,19 @@ def test():
     #     )
     # pprint(iri.get_benchmark())
     pprint(ds1)
-    _, ds2 = iri.evaluate(
+    ds2 = msis.evaluate(
         datetime(2022, 3, 21, 0, 0, 0, tzinfo=UTC),
         40.0, 105.0,
         alt_grid(),
-        set
     )
     fig, ax = plt.subplots(1, 2, sharey=True)
-    ds1.Ne.plot(ax=ax[0], y='alt_km')
-    ds2.Ne.plot(ax=ax[1], y='alt_km')
+    ds1.Tn.plot(ax=ax[0], y='alt_km')
+    ds2.Tn.plot(ax=ax[1], y='alt_km')
     ax[0].set_xscale('log')
     ax[1].set_xscale('log')
     ax[0].set_ylabel('Altitude (km)')
-    ax[0].set_title('Ne at 12:00 UTC')
-    ax[1].set_title('Ne at 00:00 UTC')
+    ax[0].set_title('Neutral temperature at 12:00 UTC')
+    ax[1].set_title('Neutral temperature at 00:00 UTC')
     plt.show()
     # ds1.to_netcdf('iri_output.nc')
 

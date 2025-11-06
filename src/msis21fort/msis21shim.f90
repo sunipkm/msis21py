@@ -23,7 +23,7 @@ subroutine msis21py_eval(iyd,sec,alt,glat,glong,stl,f107a,f107,ap,&
    real(4), intent(in)         :: ap(7)
    integer, intent(in)         :: mass, nalt
    real(4), intent(inout)      :: d(10,nalt), t(nalt)
-   real(4), intent(out)        :: exot(nalt)
+   real(4), intent(out)        :: exot
    integer                     :: i, j
    real(4)                     :: tmpd(10), tmpt(2)
    do i=1,nalt

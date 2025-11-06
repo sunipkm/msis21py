@@ -86,7 +86,7 @@ fortshim_tgt = custom_target('msis21shimmodule.c',
   command : [py, '-m', 'numpy.f2py', '@INPUT@', '-m', 'msis21shim', '--lower']
 )
 
-fs.copyfile(msis_src / 'msis21.parm', 'msis21.parm', install_dir: install_dir)
+fs.copyfile(msis_src / 'msis21.parm', 'msis21.parm', install_dir: install_dir, install: true)
 
 inc_np = include_directories(incdir_numpy, incdir_f2py)
 

@@ -32,10 +32,10 @@ classifiers = [
 ]
 license = {file = "LICENSE"}
 readme = "README.md"
-dependencies = ['meson', 'ninja', 'numpy >= 1.14.5', 'xarray']
+dependencies = ['meson', 'ninja', 'numpy >= 1.14.5', 'xarray', 'geomagdata >= 1.6.1']
 
 [project.urls]
 homepage = "https://github.com/sunipkm/msis21py"
 
 [project.scripts]
-Iri2020Test = "msis21py.base:test"
+Msis21Test = "msis21py.base:test"

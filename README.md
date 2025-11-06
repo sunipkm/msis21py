@@ -1,37 +1,35 @@
-# IRI-2020 Python Wrapper
-`iri20py` is a wrapper around the [IRI-2020](https://ccmc.gsfc.nasa.gov/models/IRI~2020/) empirical model.
+# NRLMSIS-2.1 Python Wrapper
+`msis21py` is a wrapper around the [NRLMSIS-2.1](https://ccmc.gsfc.nasa.gov/models/NRLMSIS~2.1/) empirical model.
 
-This repository includes a version of the IRI-2020 model where the call signatures have been modified for
-ease of integration with Python. The integration is achieved by means of a FORTRAN shim ([`irishim.f90`](src/IRI2020/irishim.f90))
-that is compiled into a module using [F2PY](https://numpy.org/doc/stable/f2py/index.html). Data files
-associated with IRI-2020 are included in the [`data`](src/IRI2020/data) folder and are available at
-runtime. The wrapper automatically retrieves the latest available [`ig_rz.dat`](https://chain-new.chain-project.net/echaim_downloads/ig_rz.dat)
-and [`apf107.dat`](https://chain-new.chain-project.net/echaim_downloads/apf107.dat) files on import.
+This repository uses the [NRLMSIS-2.1 model](https://map.nrl.navy.mil/map/pub/nrl/NRLMSIS/NRLMSIS2.1/nrlmsis2.1.tar.gz) as is with Python. 
+The integration is achieved by means of a FORTRAN shim ([`msis21shim.f90`](src/msis21fort/msis21shim.f90))
+that is compiled into a module using [F2PY](https://numpy.org/doc/stable/f2py/index.html). The parameter file `msis21.parm` is automatically
+provided at runtime.
 
 ## Installation
 ```sh
-pip install iri20py git+https://github.com/sunipkm/iri20py
+pip install msis21py@git+https://github.com/sunipkm/msis21py
 ```
 
 ## Usage
 ```py
-from iri20py import Iri2020, alt_grid
+from msis21py import NrlMsis21, alt_grid
 from datetime import datetime, UTC
 import matplotlib.pyplot as plt
 
 # Instantiate the model
-iri = Iri2020()
-# Note: iri is a singleton (thread safety with FORTRAN)
+msis = NrlMsis21()
+# Note: msis is a singleton (thread safety with FORTRAN)
 # Evaluate the model
-_, ds = iri.evaluate(
+ds = msis.evaluate(
     datetime(2022, 3, 12, 0, 0, 0, tzinfo=UTC),
     40, -70,
     alt_grid()
 )
 
 # ds is an xarray Dataset
-# Plot electron density profile
-ds.Ne.plot(y='alt_km')
+# Plot neutral temperature profile
+ds.Tn.plot(y='alt_km')
 plt.show()
 ```
 
@@ -39,12 +37,11 @@ plt.show()
 - Coordinates
   - Altitude (`alt_km`): Altitude in *km*
 - Data Variables (as a function of altitude)
-  - Electron density (`Ne`) in *cm*<sup>-3</sup>
-  - Electron temperature (`Te`) in *K*
-  - Ion temperature (`Ti`) in *K*
-  - O<sup>+</sup>, H<sup>+</sup>, He<sup>+</sup>, O<sub>2</sub><sup>+</sup>, NO<sup>+</sup>, N<sup>+</sup> and cluster ion densities (*cm*<sup>-3</sup>)
+  - Densities of O, O<sub>2</sub>, N<sub>2</sub>, H, He, Ar, N, Anomalous O, and NO in *cm*<sup>-3</sup>
+  - Neutral temperature (`Tn`) in *K*
+  - Mass density (`mden`) in *g cm*<sup>-3</sup>
 - Attributes
-  - `settings`: JSON string of settings (`iri20py.Settings`) used to evaluate the model.
+  - `settings`: JSON string of settings (`msis21py.Settings`) used to evaluate the model.
   - `date`: ISO formatted date and time for which the model was evaluated.
   - `lat` and `lon`: Latitude and longitude for where the model was evaluated.
   - Additional attributes as returned in the `OARR` struct (refer to IRI-2020 documentation).
