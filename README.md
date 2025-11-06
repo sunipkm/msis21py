@@ -1,3 +1,4 @@
+[![DOI](https://zenodo.org/badge/1090668363.svg)](https://zenodo.org/badge/latestdoi/1090668363)
 # NRLMSIS-2.1 Python Wrapper
 `msis21py` is a wrapper around the [NRLMSIS-2.1](https://ccmc.gsfc.nasa.gov/models/NRLMSIS~2.1/) empirical model.
 
@@ -68,7 +69,7 @@ If you use this code in your work, please cite the repository:
   year         = 2025,
   publisher    = {GitHub},
   version      = {v0.0.1},
-  doi          = {},
+  doi          = {https://zenodo.org/badge/latestdoi/1090668363},
   url          = {https://github.com/sunipkm/msis21py},
 }
 ```
