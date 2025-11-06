@@ -47,3 +47,23 @@ plt.show()
   - Additional attributes are provided as JSON dictionaries containing a `value`, its `unit`, a longer name (`long_name`) and an associated `description`, if available.
 
 The dataset is NetCDF4 compatible.
+
+# License
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+The NRLMSIS-2.1 model is in the public domain as per the [original license](nrlmsis2.1_license.txt), and is a product of the U.S. Government that is restricted to academic and research use only. Please refer to the original license for more details.
+Please follow the citation guidelines provided by NRL when using the model in your work.
+
+# Citation
+If you use this code in your work, please cite the repository:
+```
+@software{sunipkm_msis21py_2025,
+  author       = {Sunip K. Mukherjee},
+  title        = {{msis21py}: A Python Wrapper for the NRLMSIS-2.1 Empirical Model},
+  month        = jun,
+  year         = 2025,
+  publisher    = {GitHub},
+  version      = {v0.0.1},
+  doi          = {},
+  url          = {https://github.com/sunipkm/msis21py},
+}
+```
