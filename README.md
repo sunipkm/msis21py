@@ -7,8 +7,13 @@ that is compiled into a module using [F2PY](https://numpy.org/doc/stable/f2py/in
 provided at runtime.
 
 ## Installation
+### From [GitHub](https://github.com/sunipkm/msis21py)
 ```sh
 pip install msis21py@git+https://github.com/sunipkm/msis21py
+```
+### From [PyPI](https://pypi.org/project/msis21py/)
+```sh
+pip install msis21py
 ```
 
 ## Usage
@@ -55,7 +60,7 @@ Please follow the citation guidelines provided by NRL when using the model in yo
 
 # Citation
 If you use this code in your work, please cite the repository:
-```
+```bibtex
 @software{sunipkm_msis21py_2025,
   author       = {Sunip K. Mukherjee},
   title        = {{msis21py}: A Python Wrapper for the NRLMSIS-2.1 Empirical Model},
