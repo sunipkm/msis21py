@@ -10,6 +10,7 @@ import numpy as np
 ControlMode = Literal['Off', 'On', 'Cross']
 ApMode = Literal['Daily', 'Storm']
 
+
 def flags(inp: str) -> np.float32:
     if inp == 'Off':
         return np.float32(0)
@@ -23,6 +24,7 @@ def flags(inp: str) -> np.float32:
         return np.float32(-1.0)
     else:
         raise ValueError(f'Unknown flag {inp}')
+
 
 @dataclass
 class Settings:
@@ -57,7 +59,6 @@ class Settings:
     terdiurnal: ControlMode = 'On'
     """Terdiurnal effects control mode."""
 
-
     def to_json(self) -> str:
         """Convert settings to JSON string.
 
@@ -71,7 +72,7 @@ class Settings:
 
 @dataclass
 class ComputedSettings:
-    """Computed settings for IRI-2020 model evaluation.
+    """Computed settings for NRLMSIS-2.1 model evaluation.
     DO NOT create this class directly; use :obj:`ComputedSettings.from_settings()` instead.
     """
     switch_legacy: np.ndarray

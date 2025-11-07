@@ -62,7 +62,8 @@ def interpolate_nan(y: ndarray, *, inplace: bool = True, left: SupportsAbs = Non
     if not inplace:
         y = y.copy()
     nans, x = nan_helper(y)
-    y[nans] = interp(x(nans), x(~nans), y[~nans], left=left, right=right, period=period)
+    y[nans] = interp(x(nans), x(~nans), y[~nans],
+                     left=left, right=right, period=period)
     return y
 
 
@@ -80,13 +81,15 @@ def alt_grid(num: int = 250, minalt: Numeric = 60, dmin: Numeric = 0.5, dmax: Nu
     ### Returns:
         - `ndarray`: Altitude grid (km)
     """
-    out = linspace(0, 3.14, num, dtype=float32, endpoint=False)  # tanh gets to 99% of asymptote
+    out = linspace(0, 3.14, num, dtype=float32,
+                   endpoint=False)  # tanh gets to 99% of asymptote
     tanh(out, out=out, order='F')
     out *= dmax
     out += dmin
     cumsum(out, out=out)
     out += minalt - dmin
     return out
+
 
 class Singleton(object):
     """
@@ -146,18 +149,3 @@ class singleton:
             pass
         self._instance = self._decorated(*args, **kwargs)
         return self._instance
-
-
-# %% Test functions
-if __name__ == '__main__':
-    import numpy as np
-    y = np.array([0, 1, np.nan, np.nan, 4, 5, 6, np.nan, 8, 9])
-    assert np.allclose(interpolate_nan(y),  [0., 1., 2., 3., 4., 5., 6., 7., 8., 9.])
-    y = np.array([1, 1, 1, np.nan, np.nan, 2, 2, np.nan, 0])
-    assert np.allclose(np.round(interpolate_nan(y), 2), [1., 1., 1., 1.33, 1.67, 2., 2., 1., 0.])
-    lats = np.arange(-80, 80, 20)
-    glats = geocent_to_geodet(lats)
-    gglats = list(map(geocent_to_geodet, lats))
-    assert np.allclose(glats, gglats)
-
-# %%

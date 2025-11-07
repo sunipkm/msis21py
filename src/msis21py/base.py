@@ -110,7 +110,7 @@ class NrlMsis21(Singleton):
         descriptions = ['Helium', 'Atomic Oxygen', 'Molecular Nitrogen',
                         'Molecular Oxygen', 'Argon', 'Hydrogen', 'Nitrogen',
                         'Anomalous Oxygen', 'Nitric Oxide']
-        density_idx = list(range(5)) + list(range(7, 10))
+        density_idx = list(range(5)) + list(range(6, 10))
         for idx, name, desc in zip(density_idx, densities, descriptions):
             ds[name] = (('alt_km',), fort_densities[idx],
                         {'units': 'cm^-3', 'long_name': f'{desc} Density'})
