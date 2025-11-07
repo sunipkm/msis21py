@@ -209,12 +209,12 @@ class NrlMsis21(Singleton):
         lon = lon % 360  # ensure lon is in 0-360 range
         ds = self.lowlevel(
             lat, lon, alt, ydate, utsec,
-            f107a, f107p, ap
+            f107a, f107p, np.array([ap]*7, dtype=np.float32, order='F')
         )
         ds.attrs['date'] = time.isoformat()
         return ds
 
-    def lowlevel(self, lat: Numeric, lon: Numeric, alt: np.ndarray, ydate: int, ut: Numeric, f107a: Numeric, f107p: Numeric, ap: Numeric) -> Dataset:
+    def lowlevel(self, lat: Numeric, lon: Numeric, alt: np.ndarray, ydate: int, ut: Numeric, f107a: Numeric, f107p: Numeric, ap: np.ndarray) -> Dataset:
         """Low level call to evaluate NRLMSIS-2.1 model.
         Bypasses date and time calculations.
 
@@ -224,6 +224,9 @@ class NrlMsis21(Singleton):
             alt (np.ndarray): Altitude in kilometers
             ydate (int): YYYYDDD date format
             ut (Numeric): Universal time in seconds
+            f107a (Numeric): 81-day average F10.7 solar flux
+            f107p (Numeric): Previous day F10.7 solar flux
+            ap (np.ndarray): Array of 7 daily Ap geomagnetic indices. Length must be 7. The first element is for the current 3-hour period. The remaining 6 elements are only used in 'Storm' mode.
 
         Returns:
             Dataset: Computed dataset.
@@ -231,7 +234,7 @@ class NrlMsis21(Singleton):
         ds = self._msiscall(
             lat, lon, alt, ydate, ut,
             (f107a, f107p),
-            np.array([ap] + [0]*6, dtype=np.float32, order='F')
+            ap
         )
         return ds
 
