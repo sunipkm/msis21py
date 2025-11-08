@@ -1,7 +1,7 @@
 # %%
 from __future__ import annotations
 from numbers import Number
-from typing import Iterable, SupportsAbs, Tuple, SupportsFloat as Numeric, Callable
+from typing import Iterable, Optional, SupportsAbs, Tuple, SupportsFloat as Numeric, Callable
 from numpy import arctan, cumsum, float32, interp, isnan, linspace, ndarray, tan, pi as M_PI, asarray, all, tanh
 from datetime import datetime
 
@@ -46,7 +46,7 @@ def nan_helper(y: ndarray) -> Tuple[ndarray, Callable[[ndarray], ndarray]]:
     return isnan(y), lambda z: z.nonzero()[0]
 
 
-def interpolate_nan(y: ndarray, *, inplace: bool = True, left: SupportsAbs = None, right: SupportsAbs = None, period: Numeric = None) -> ndarray:
+def interpolate_nan(y: ndarray, *, inplace: bool = True, left: Optional[SupportsAbs] = None, right: Optional[SupportsAbs] = None, period: Optional[Numeric] = None) -> ndarray:
     """## Interpolate NaNs in a 1-D array.
 
     ### Args:
@@ -63,7 +63,7 @@ def interpolate_nan(y: ndarray, *, inplace: bool = True, left: SupportsAbs = Non
         y = y.copy()
     nans, x = nan_helper(y)
     y[nans] = interp(x(nans), x(~nans), y[~nans],
-                     left=left, right=right, period=period)
+                     left=left, right=right, period=period)  # type: ignore
     return y
 
 
@@ -81,13 +81,15 @@ def alt_grid(num: int = 250, minalt: Numeric = 60, dmin: Numeric = 0.5, dmax: Nu
     ### Returns:
         - `ndarray`: Altitude grid (km)
     """
-    out = linspace(0, 3.14, num, dtype=float32,
-                   endpoint=False)  # tanh gets to 99% of asymptote
+    out = linspace(
+        0, 3.14, num, dtype=float32,
+        endpoint=False
+    )  # tanh gets to 99% of asymptote
     tanh(out, out=out, order='F')
-    out *= dmax
-    out += dmin
+    out *= float(dmax)
+    out += (float(dmin))
     cumsum(out, out=out)
-    out += minalt - dmin
+    out += float(minalt) - float(dmin)
     return out
 
 
@@ -118,6 +120,7 @@ class Singleton(object):
         """Initialization method for the singleton class. Override this method in the subclass if needed.
         """
         pass
+
 
 class singleton:
     """

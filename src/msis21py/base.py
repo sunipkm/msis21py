@@ -223,7 +223,7 @@ class NrlMsis21(Singleton):
             time = time.astimezone(UTC)
         ydate, utsec = msisdate(time)
         if geomag_params is None:
-            ip = gi.get_indices([time - timedelta(days=1), time],
+            ip = gi.get_indices([time - timedelta(days=1), time], # type: ignore
                                 81, tzaware=tzaware)  # type: ignore
             f107a = float(ip["f107s"].iloc[1])
             f107 = float(ip['f107'].iloc[1])
@@ -248,7 +248,7 @@ class NrlMsis21(Singleton):
         else:
             raise RuntimeError('Invalid type %s for geomag params %s' % (
                 str(type(geomag_params), str(geomag_params))))
-        lon = lon % 360  # ensure lon is in 0-360 range
+        lon = lon % 360  # ensure lon is in 0-360 range # type: ignore
         ds = self.lowlevel(
             lat, lon, alt, ydate, utsec,
             f107a, f107p, ap
