@@ -35,8 +35,14 @@ class Attribute:
 
 
 class NrlMsis21(Singleton):
-    def _init(self):
-        self.change_settings(Settings())
+    """NRLMSIS-2.1 Model
+
+    Args:
+        settings (Optional[Settings], optional): Model settings. If None, default settings are used. Defaults to None.
+    """
+    def _init(self, settings: Optional[Settings] = None):
+        sett = settings or Settings()
+        self.change_settings(sett)
         self._benchmark = False
         self._call = 0
         self._setup = 0

@@ -102,18 +102,22 @@ class Singleton(object):
     3. Classes that inherit from a class inheriting from `Singleton` will NOT
     have its `_init` method called.
     """
-    def __new__(cls):
+    def __new__(cls, *args, **kwargs):
         try:
             return cls.__instance
         except AttributeError:
             pass
         cls.__instance = super(Singleton, cls).__new__(cls)
         try:
-            cls.__instance._init()
+            cls.__instance._init(*args, **kwargs)
         except AttributeError:
             pass
         return cls.__instance
 
+    def _init(self):
+        """Initialization method for the singleton class. Override this method in the subclass if needed.
+        """
+        pass
 
 class singleton:
     """
