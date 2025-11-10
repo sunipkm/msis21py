@@ -40,6 +40,7 @@ class NrlMsis21(Singleton):
     Args:
         settings (Optional[Settings], optional): Model settings. If None, default settings are used. Defaults to None.
     """
+
     def _init(self, settings: Optional[Settings] = None):
         sett = settings or Settings()
         self.change_settings(sett)
@@ -111,17 +112,23 @@ class NrlMsis21(Singleton):
         ds = Dataset()
         ds.coords['alt_km'] = (
             ('alt_km',), alt, {'units': 'km', 'long_name': 'Altitude'})
-        densities = ['He', 'O', 'N2', 'O2',
-                     'Ar', 'H', 'N', 'Anomalous O', 'NO']
-        descriptions = ['Helium', 'Atomic Oxygen', 'Molecular Nitrogen',
-                        'Molecular Oxygen', 'Argon', 'Hydrogen', 'Nitrogen',
-                        'Anomalous Oxygen', 'Nitric Oxide']
+        densities = [
+            'He', 'O', 'N2', 'O2',
+            'Ar', 'H', 'N', 'Anomalous O', 'NO'
+        ]
+        descriptions = [
+            'Helium', 'Atomic Oxygen', 'Molecular Nitrogen',
+            'Molecular Oxygen', 'Argon', 'Hydrogen', 'Nitrogen',
+            'Anomalous Oxygen', 'Nitric Oxide'
+        ]
         density_idx = list(range(5)) + list(range(6, 10))
         for idx, name, desc in zip(density_idx, densities, descriptions):
             ds[name] = (('alt_km',), fort_densities[idx],
                         {'units': 'cm^-3', 'long_name': f'{desc} Density'})
-        ds['mden'] = (('alt_km',), fort_densities[5],
-                      {'units': 'g/cm^3', 'long_name': 'Mass Density'})
+        ds['mden'] = (
+            ('alt_km',), fort_densities[5],
+            {'units': 'g/cm^3', 'long_name': 'Mass Density'}
+        )
         ds['Tn'] = (('alt_km',), fort_temps,
                     {'units': 'K', 'long_name': 'Neutral Temperature'})
         ds_build = perf_counter_ns()
@@ -172,7 +179,7 @@ class NrlMsis21(Singleton):
         return ds
 
     @staticmethod
-    def storm_ap(time: datetime, *, tzaware: bool=False) -> np.ndarray:
+    def storm_ap(time: datetime, *, tzaware: bool = False) -> np.ndarray:
         """Compute Storm-time Ap array for given time.
 
         Args:
@@ -187,14 +194,22 @@ class NrlMsis21(Singleton):
         ap = np.zeros(7, dtype=float)
         tstart = time
         tstart = tstart.replace(hour=0, minute=0, second=0, microsecond=0)
-        ip = gi.get_indices([tstart + timedelta(hours=hours) for hours in range(0,24,3)], tzaware=tzaware)  # type: ignore
-        ap[0] = ip['Ap'].to_numpy().mean() # Daily average Ap
-        ip = gi.get_indices([time, time-timedelta(hours=3), time-timedelta(hours=6), time-timedelta(hours=9)], tzaware=tzaware)  # type: ignore
-        ap[1:5] = ip['Ap'].to_numpy() # Current and previous 3-hour Ap indices
-        ip = gi.get_indices([time-timedelta(hours=hours) for hours in range(12,36,3)], tzaware=tzaware)  # type: ignore
-        ap[5] = ip['Ap'].to_numpy().mean() # 12 to 36 hours ago average Ap
-        ip = gi.get_indices([time-timedelta(hours=hours) for hours in range(36,60,3)], tzaware=tzaware)  # type: ignore
-        ap[6] = ip['Ap'].to_numpy().mean() # 36 to 60 hours ago average Ap
+        ip = gi.get_indices([tstart + timedelta(hours=hours)
+                            # type: ignore
+                             for hours in range(0, 24, 3)], tzaware=tzaware)
+        ap[0] = ip['Ap'].to_numpy().mean()  # Daily average Ap
+        ip = gi.get_indices([time, time-timedelta(hours=3), time-timedelta(
+            # type: ignore
+            hours=6), time-timedelta(hours=9)], tzaware=tzaware)
+        ap[1:5] = ip['Ap'].to_numpy()  # Current and previous 3-hour Ap indices
+        ip = gi.get_indices([time-timedelta(hours=hours)
+                            # type: ignore
+                             for hours in range(12, 36, 3)], tzaware=tzaware)
+        ap[5] = ip['Ap'].to_numpy().mean()  # 12 to 36 hours ago average Ap
+        ip = gi.get_indices([time-timedelta(hours=hours)
+                            # type: ignore
+                             for hours in range(36, 60, 3)], tzaware=tzaware)
+        ap[6] = ip['Ap'].to_numpy().mean()  # 36 to 60 hours ago average Ap
         ap = ap.astype(np.float32, order='F')
         return ap
 
@@ -223,13 +238,13 @@ class NrlMsis21(Singleton):
             time = time.astimezone(UTC)
         ydate, utsec = msisdate(time)
         if geomag_params is None:
-            ip = gi.get_indices([time - timedelta(days=1), time], # type: ignore
+            ip = gi.get_indices([time - timedelta(days=1), time],  # type: ignore
                                 81, tzaware=tzaware)  # type: ignore
             f107a = float(ip["f107s"].iloc[1])
             f107 = float(ip['f107'].iloc[1])
             f107p = float(ip['f107'].iloc[0])
             ap = float(ip["Ap"].iloc[1])
-            if self.settings.ap_mode == 'Storm': # Storm-time Ap mode
+            if self.settings.ap_mode == 'Storm':  # Storm-time Ap mode
                 ap = self.storm_ap(time)
             else:
                 ap = np.array([ap]*7, dtype=np.float32, order='F')
@@ -242,7 +257,8 @@ class NrlMsis21(Singleton):
                 if ap.dtype != np.float32:
                     ap = ap.astype(np.float32, order='F')
                 if ap.size != 7:
-                    raise RuntimeError('Ap array must be of length 7 for geomag params %s' % str(geomag_params))
+                    raise RuntimeError(
+                        'Ap array must be of length 7 for geomag params %s' % str(geomag_params))
             else:
                 ap = np.array([float(ap)]*7, dtype=np.float32, order='F')
         else:
