@@ -70,10 +70,10 @@ If you use this code in your work, please cite the repository:
 @software{sunipkm_msis21py_2025,
   author       = {Sunip K. Mukherjee},
   title        = {{msis21py}: A Python Wrapper for the NRLMSIS-2.1 Empirical Model},
-  month        = jun,
+  month        = nov,
   year         = 2025,
   publisher    = {GitHub},
-  version      = {v0.0.1},
+  version      = {v0.0.2},
   doi          = {https://zenodo.org/badge/latestdoi/1090668363},
   url          = {https://github.com/sunipkm/msis21py},
 }
