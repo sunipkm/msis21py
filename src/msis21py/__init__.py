@@ -1,9 +1,8 @@
 from .base import NrlMsis21, __version__
-from .settings import Settings, ComputedSettings
+from . import settings
 from .utils import alt_grid
 
 __all__ = [
-    "NrlMsis21", "Settings", "ComputedSettings",
-    "alt_grid",
+    "NrlMsis21", "settings", "alt_grid",
     "__version__"
 ]

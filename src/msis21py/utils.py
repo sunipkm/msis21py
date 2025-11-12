@@ -1,8 +1,7 @@
 # %%
 from __future__ import annotations
-from numbers import Number
-from typing import Iterable, Optional, SupportsAbs, Tuple, SupportsFloat as Numeric, Callable
-from numpy import arctan, cumsum, float32, interp, isnan, linspace, ndarray, tan, pi as M_PI, asarray, all, tanh
+from typing import Tuple, SupportsFloat as Numeric
+from numpy import cumsum, float32, linspace, ndarray, tanh
 from datetime import datetime
 
 """
@@ -26,45 +25,6 @@ def msisdate(t: datetime) -> Tuple[int, Numeric]:
     utsec = (t.hour * 3600 + t.minute * 60 + t.second + t.microsecond / 1e6)
 
     return (year, utsec)
-
-
-def nan_helper(y: ndarray) -> Tuple[ndarray, Callable[[ndarray], ndarray]]:
-    """## Helper function to return NaN indices and a function to return non-NaN indices.
-
-    ### Args:
-        - `y (ndarray)`: Input 1-D array with NaNs.
-
-    ### Returns:
-        - `Tuple[ndarray, Callable[[ndarray], ndarray]]`: Tuple of NaN indices and a function to return non-NaN indices.
-
-    ### Example:
-        >>> # linear interpolation of NaNs
-        >>> nans, x= nan_helper(y)
-        >>> y[nans]= np.interp(x(nans), x(~nans), y[~nans])
-    """
-
-    return isnan(y), lambda z: z.nonzero()[0]
-
-
-def interpolate_nan(y: ndarray, *, inplace: bool = True, left: Optional[SupportsAbs] = None, right: Optional[SupportsAbs] = None, period: Optional[Numeric] = None) -> ndarray:
-    """## Interpolate NaNs in a 1-D array.
-
-    ### Args:
-        - `y (ndarray)`: 1-D Array.
-        - `inplace (bool, optional)`: Change input array in place. Defaults to True.
-        - `left (Numeric, optional)`: Left boundary value. Defaults to 0.
-        - `right (Numeric, optional)`: Right boundary value. Defaults to None.
-        - `period (Numeric, optional)`: Period of the array. Defaults to None.
-
-    ### Returns:
-        - `ndarray`: Interpolated array.
-    """
-    if not inplace:
-        y = y.copy()
-    nans, x = nan_helper(y)
-    y[nans] = interp(x(nans), x(~nans), y[~nans],
-                     left=left, right=right, period=period)  # type: ignore
-    return y
 
 
 def alt_grid(num: int = 250, minalt: Numeric = 60, dmin: Numeric = 0.5, dmax: Numeric = 4) -> ndarray:

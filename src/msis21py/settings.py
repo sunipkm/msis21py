@@ -11,21 +11,6 @@ ControlMode = Literal['Off', 'On', 'Cross']
 ApMode = Literal['Daily', 'Storm']
 
 
-def flags(inp: str) -> np.float32:
-    if inp == 'Off':
-        return np.float32(0)
-    elif inp == 'On':
-        return np.float32(1.0)
-    elif inp == 'Daily':
-        return np.float32(1.0)
-    elif inp == 'Cross':
-        return np.float32(2.0)
-    elif inp == 'Storm':
-        return np.float32(-1.0)
-    else:
-        raise ValueError(f'Unknown flag {inp}')
-
-
 @dataclass
 class Settings:
     """Settings for NRLMSIS-2.1 model evaluation.
@@ -70,6 +55,21 @@ class Settings:
         return json.dumps(asdict(self))
 
 
+def _flags(inp: str) -> np.float32:
+    if inp == 'Off':
+        return np.float32(0)
+    elif inp == 'On':
+        return np.float32(1.0)
+    elif inp == 'Daily':
+        return np.float32(1.0)
+    elif inp == 'Cross':
+        return np.float32(2.0)
+    elif inp == 'Storm':
+        return np.float32(-1.0)
+    else:
+        raise ValueError(f'Unknown flag {inp}')
+
+
 @dataclass
 class ComputedSettings:
     """Computed settings for NRLMSIS-2.1 model evaluation.
@@ -88,18 +88,18 @@ class ComputedSettings:
             ComputedSettings: Computed settings for model evaluation.
         """
         switch_legacy = np.full(25, 1.0, dtype=np.float32)
-        switch_legacy[0] = flags(settings.f107)
-        switch_legacy[1] = flags(settings.time_independent)
-        switch_legacy[2] = flags(settings.symmetrical_annual)
-        switch_legacy[3] = flags(settings.symmetrical_semiannual)
-        switch_legacy[4] = flags(settings.asymmetrical_annual)
-        switch_legacy[5] = flags(settings.asymmetrical_semiannual)
-        switch_legacy[6] = flags(settings.diurnal)
-        switch_legacy[7] = flags(settings.semidiurnal)
-        switch_legacy[8] = flags(settings.ap_mode)
-        switch_legacy[9] = flags(settings.all_spatiotemporal_effects)
-        switch_legacy[10] = flags(settings.longitude_effects)
-        switch_legacy[11] = flags(settings.time_and_mixed_effects)
-        switch_legacy[12] = flags(settings.ap_and_time_effects)
-        switch_legacy[13] = flags(settings.terdiurnal)
+        switch_legacy[0] = _flags(settings.f107)
+        switch_legacy[1] = _flags(settings.time_independent)
+        switch_legacy[2] = _flags(settings.symmetrical_annual)
+        switch_legacy[3] = _flags(settings.symmetrical_semiannual)
+        switch_legacy[4] = _flags(settings.asymmetrical_annual)
+        switch_legacy[5] = _flags(settings.asymmetrical_semiannual)
+        switch_legacy[6] = _flags(settings.diurnal)
+        switch_legacy[7] = _flags(settings.semidiurnal)
+        switch_legacy[8] = _flags(settings.ap_mode)
+        switch_legacy[9] = _flags(settings.all_spatiotemporal_effects)
+        switch_legacy[10] = _flags(settings.longitude_effects)
+        switch_legacy[11] = _flags(settings.time_and_mixed_effects)
+        switch_legacy[12] = _flags(settings.ap_and_time_effects)
+        switch_legacy[13] = _flags(settings.terdiurnal)
         return ComputedSettings(switch_legacy=switch_legacy)

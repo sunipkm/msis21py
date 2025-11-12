@@ -8,6 +8,7 @@ that is compiled into a module using [F2PY](https://numpy.org/doc/stable/f2py/in
 provided at runtime.
 
 ## Installation
+A Fortran compiler is *REQUIRED* to build the FORTRAN extension module.
 ### From [PyPI](https://pypi.org/project/msis21py/)
 ```sh
 pip install msis21py
