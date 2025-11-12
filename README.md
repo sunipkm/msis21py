@@ -55,6 +55,10 @@ plt.show()
 
 The dataset is NetCDF4 compatible.
 
+## Examples
+An example script to generate the following plot is available in the in [`tests/test_msis21.py`](tests/test_msis21.py).
+![MSIS-2.1 Example Plot](tests/msis21.png)
+
 # License
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 The NRLMSIS-2.1 model is in the public domain as per the [original license](nrlmsis2.1_license.txt), and is a product of the U.S. Government that is restricted to academic and research use only. Please refer to the original license for more details.
