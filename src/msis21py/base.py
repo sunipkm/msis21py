@@ -176,6 +176,7 @@ class NrlMsis21(Singleton):
             self._ds_attrib += (ds_attrib - ds_build)*1e-6
             self._ds_settings += (ds_settings - ds_attrib)*1e-6
             self._total += (ds_settings - start)*1e-6
+        ds.attrs['version'] = f'MSIS-2.1 {__version__}'
         return ds
 
     @staticmethod
@@ -327,6 +328,7 @@ def test():
         alt_grid(),
     )
     fig, ax = plt.subplots(1, 2, sharey=True)
+    fig.suptitle(ds2.attrs['version'])
     ds1.Tn.plot(ax=ax[0], y='alt_km')
     ds2.Tn.plot(ax=ax[1], y='alt_km')
     ax[0].set_xscale('log')
