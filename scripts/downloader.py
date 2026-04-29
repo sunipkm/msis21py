@@ -13,6 +13,8 @@ import hashlib
 import argparse
 import socket
 
+ROOTDIR = Path(__file__).parent.parent
+
 
 def url_retrieve(
     url: str,
@@ -32,18 +34,22 @@ def url_retrieve(
     overwrite: bool
         overwrite if file exists
     """
+    ROOTFILE = ROOTDIR / Path(url).name
     outfile = Path(outfile).expanduser().resolve()
     if outfile.is_dir():
         raise ValueError("Please specify full filepath, including filename")
     # need .resolve() in case intermediate relative dir doesn't exist
     if overwrite or not outfile.is_file():
         outfile.parent.mkdir(parents=True, exist_ok=True)
-        try:
-            urllib.request.urlretrieve(url, str(outfile))
-        except (socket.gaierror, urllib.error.URLError) as err:
-            raise SystemExit(
-                "ConnectionError: could not download {} due to {}".format(url, err)
-            )
+        if ROOTFILE.exists():
+            outfile.write_bytes(ROOTFILE.read_bytes())
+        else:
+            try:
+                urllib.request.urlretrieve(url, str(outfile))
+            except (socket.gaierror, urllib.error.URLError) as err:
+                raise SystemExit(
+                    "ConnectionError: could not download {} due to {}".format(url, err)
+                )
 
     if filehash:
         if not file_checksum(outfile, filehash[0], filehash[1]):
