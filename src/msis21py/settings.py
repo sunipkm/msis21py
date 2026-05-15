@@ -1,9 +1,7 @@
 # %%
 from __future__ import annotations
-from numbers import Number
-from typing import List, Literal, Optional, Tuple
+from typing import Literal
 from dataclasses import dataclass
-from pathlib import Path
 
 import numpy as np
 

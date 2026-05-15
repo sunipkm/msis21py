@@ -6,7 +6,7 @@ import os
 from pathlib import Path
 from dataclasses import dataclass
 from time import perf_counter_ns
-from typing import Any, Dict, Iterable, Optional, Sequence, Tuple, SupportsFloat as Numeric
+from typing import Any, Dict, Optional, Tuple, SupportsFloat as Numeric
 import numpy as np
 from xarray import Dataset
 import geomagdata as gi
@@ -15,7 +15,10 @@ import importlib.metadata
 from .utils import Singleton, msisdate
 from .settings import Settings, ComputedSettings
 
-__version__ = importlib.metadata.version("msis21py")
+try:
+    __version__ = importlib.metadata.version("msis21py")
+except importlib.metadata.PackageNotFoundError:
+    __version__ = "unknown"
 
 DIRNAME = Path(os.path.dirname(__file__))
 DATADIR = DIRNAME.resolve()
@@ -195,21 +198,36 @@ class NrlMsis21(Singleton):
         ap = np.zeros(7, dtype=float)
         tstart = time
         tstart = tstart.replace(hour=0, minute=0, second=0, microsecond=0)
-        ip = gi.get_indices([tstart + timedelta(hours=hours)
-                            # type: ignore
-                             for hours in range(0, 24, 3)], tzaware=tzaware)
+        ip = gi.get_indices(
+            [
+                tstart + timedelta(hours=hours)
+                # type: ignore
+                for hours in range(0, 24, 3)
+            ],
+            tzaware=tzaware,
+        )
         ap[0] = ip['Ap'].to_numpy().mean()  # Daily average Ap
         ip = gi.get_indices([time, time-timedelta(hours=3), time-timedelta(
             # type: ignore
             hours=6), time-timedelta(hours=9)], tzaware=tzaware)
         ap[1:5] = ip['Ap'].to_numpy()  # Current and previous 3-hour Ap indices
-        ip = gi.get_indices([time-timedelta(hours=hours)
-                            # type: ignore
-                             for hours in range(12, 36, 3)], tzaware=tzaware)
+        ip = gi.get_indices(
+            [
+                time-timedelta(hours=hours)
+                # type: ignore
+                for hours in range(12, 36, 3)
+            ],
+            tzaware=tzaware,
+        )
         ap[5] = ip['Ap'].to_numpy().mean()  # 12 to 36 hours ago average Ap
-        ip = gi.get_indices([time-timedelta(hours=hours)
-                            # type: ignore
-                             for hours in range(36, 60, 3)], tzaware=tzaware)
+        ip = gi.get_indices(
+            [
+                time-timedelta(hours=hours)
+                # type: ignore
+                for hours in range(36, 60, 3)
+            ],
+            tzaware=tzaware,
+        )
         ap[6] = ip['Ap'].to_numpy().mean()  # 36 to 60 hours ago average Ap
         ap = ap.astype(np.float32, order='F')
         return ap

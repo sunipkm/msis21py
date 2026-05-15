@@ -38,7 +38,7 @@ py = py_mod.find_installation(pure: false)
 py_dep = py.dependency()
 
 install_dir = join_paths(py.get_install_dir(), 'msis21py')
-build_dir = meson.build_root()
+build_dir = meson.project_build_root()
 msis_tar = build_dir / 'nrlmsis21.tar.gz'
 msis_src = build_dir / 'nrlmsis21'
 

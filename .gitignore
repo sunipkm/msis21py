@@ -8,4 +8,5 @@ messages.txt
 test.txt
 iri_log.txt
 *.tar.gz
+!nrlmsis2.1.tar.gz
 *.png

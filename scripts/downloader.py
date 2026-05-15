@@ -36,11 +36,11 @@ def url_retrieve(
     """
     ROOTFILE = ROOTDIR / Path(url).name
     outfile = Path(outfile).expanduser().resolve()
+    outfile.parent.mkdir(parents=True, exist_ok=True)
     if outfile.is_dir():
         raise ValueError("Please specify full filepath, including filename")
     # need .resolve() in case intermediate relative dir doesn't exist
     if overwrite or not outfile.is_file():
-        outfile.parent.mkdir(parents=True, exist_ok=True)
         if ROOTFILE.exists():
             outfile.write_bytes(ROOTFILE.read_bytes())
         else:
